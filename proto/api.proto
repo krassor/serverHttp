@@ -1,0 +1,14 @@
+syntax = "proto3";
+package message_service;
+option go_package = "/pb;gen";
+message Request {
+    string text    = 1;
+    string subtext = 2;
+}
+message Response {
+    string text    = 1;
+    string subtext = 2;
+}
+service MessageService {
+    rpc SayIt (Request) returns (Response);
+}
