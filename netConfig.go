@@ -29,8 +29,6 @@ type ErrorJson struct {
 type MessageServer struct {
 }
 
-var portGrpc = ":8080"
-
 var DATA = make(map[string]Coin)
 var DATASLICE []Coin
 var DATAFILE = "/tmp/dataFile.gob"
@@ -121,49 +119,64 @@ func (MessageServer) SayIt(ctx context.Context, r *p.Request) (*p.Response, erro
 }
 
 func main() {
-	PORT := ":8001"
+
 	arguments := os.Args
 	if len(arguments) == 1 {
-		fmt.Println("using default port: ", PORT)
+		//fmt.Println("using default http port: ", PORT)
+		//fmt.Println("using default grpc port: ", portGrpc)
 	} else {
-		PORT = ":" + arguments[1]
+		//PORT = ":" + arguments[1]
 	}
 
-	r := http.NewServeMux()
+	go func() {
+		PORT := ":8001"
+		r := http.NewServeMux()
 
-	srv := &http.Server{
-		Addr:         PORT,
-		Handler:      r,
-		ReadTimeout:  3 * time.Second,
-		WriteTimeout: 3 * time.Second,
+		srv := &http.Server{
+			Addr:         PORT,
+			Handler:      r,
+			ReadTimeout:  3 * time.Second,
+			WriteTimeout: 3 * time.Second,
+		}
+
+		r.HandleFunc("/time", timeHandler)
+		r.HandleFunc("/", defaultHandler)
+		r.HandleFunc("/api/coins", coinsHandler)
+		r.HandleFunc("/change", changeElement)
+		r.HandleFunc("/list", listAll)
+
+		r.HandleFunc("/debug/pprof/", pprof.Index)
+		r.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		r.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		r.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		r.HandleFunc("/debug/pprof/trace", pprof.Trace)
+
+		fmt.Println("Server http starting...")
+		err := srv.ListenAndServe()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		//fmt.Println("Server http started")
+	}()
+
+	go func() {
+		portGrpc := ":8080"
+		fmt.Println("Server gRPC starting...")
+		server := grpc.NewServer()
+		var messageServer MessageServer
+		p.RegisterMessageServiceServer(server, messageServer)
+		listen, err := net.Listen("tcp", portGrpc)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("gRPC Serving requests...")
+		server.Serve(listen)
+	}()
+	fmt.Println("Goroutins started")
+	for {
+
 	}
-
-	r.HandleFunc("/time", timeHandler)
-	r.HandleFunc("/", defaultHandler)
-	r.HandleFunc("/api/coins", coinsHandler)
-	r.HandleFunc("/change", changeElement)
-	r.HandleFunc("/list", listAll)
-
-	r.HandleFunc("/debug/pprof/", pprof.Index)
-	r.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	r.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	r.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	r.HandleFunc("/debug/pprof/trace", pprof.Trace)
-
-	err := srv.ListenAndServe()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	server := grpc.NewServer()
-	var messageServer MessageServer
-	p.RegisterMessageServiceServer(server, messageServer)
-	listen, err := net.Listen("tcp", portGrpc)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println("Serving requests...")
-	server.Serve(listen)
-
+	fmt.Println("End program")
 }
