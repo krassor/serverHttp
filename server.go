@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -10,10 +11,13 @@ import (
 	"net/http/pprof"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	p "github.com/krassor/serverHttp/proto/pb"
 	"google.golang.org/grpc"
+
+	sm "serverHttp/supportModule"
 )
 
 type Coin struct {
@@ -120,15 +124,17 @@ func (MessageServer) SayIt(ctx context.Context, r *p.Request) (*p.Response, erro
 
 func main() {
 
-	arguments := os.Args
-	if len(arguments) == 1 {
-		//fmt.Println("using default http port: ", PORT)
-		//fmt.Println("using default grpc port: ", portGrpc)
-	} else {
-		//PORT = ":" + arguments[1]
-	}
+	//arguments := os.Args
+	// if len(arguments) == 1 {
+	// 	fmt.Println("using default http port: ", PORT)
+	// 	fmt.Println("using default grpc port: ", portGrpc)
+	// } else {
+	// 	PORT = ":" + arguments[1]
+	// }
 
 	go func() {
+		//fmt.Println(time.Now().Format(time.RFC3339), " :", "Server HTTP starting...")
+		sm.PrintlnWithTimeShtamp("erver HTTP starting...")
 		PORT := ":8001"
 		r := http.NewServeMux()
 
@@ -151,18 +157,19 @@ func main() {
 		r.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
 		r.HandleFunc("/debug/pprof/trace", pprof.Trace)
 
-		fmt.Println("Server http starting...")
+		fmt.Println(time.Now().Format(time.RFC3339), " :", "Server HTTP listening...")
 		err := srv.ListenAndServe()
+		defer srv.Close()
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		//fmt.Println("Server http started")
+
 	}()
 
 	go func() {
+		fmt.Println(time.Now().Format(time.RFC3339), " :", "Server gRPC starting")
 		portGrpc := ":8080"
-		fmt.Println("Server gRPC starting...")
 		server := grpc.NewServer()
 		var messageServer MessageServer
 		p.RegisterMessageServiceServer(server, messageServer)
@@ -170,13 +177,27 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 			return
+		} else {
+			fmt.Println(time.Now().Format(time.RFC3339), " :", "Server gRPC listening...")
+			server.Serve(listen)
 		}
-		fmt.Println("gRPC Serving requests...")
-		server.Serve(listen)
+		defer listen.Close()
 	}()
-	fmt.Println("Goroutins started")
-	for {
 
+	go func() {
+
+	}()
+
+	//fmt.Println("Goroutins started", time.Now().Format(time.RFC3339))
+	time.Sleep(1 * time.Second)
+	for {
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print(">> ")
+		text, _ := reader.ReadString('\n')
+		if strings.TrimSpace(string(text)) == "stop" {
+			fmt.Println("Program exiting...")
+			return
+		}
 	}
-	fmt.Println("End program")
+	//fmt.Println("End program")
 }
