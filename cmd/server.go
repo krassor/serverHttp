@@ -15,9 +15,9 @@ import (
 	"time"
 
 	p "github.com/krassor/serverHttp/proto/pb"
-	"google.golang.org/grpc"
 
-	sm "serverHttp/supportModule"
+	sm "github.com/krassor/serverHttp/supportModule"
+	"google.golang.org/grpc"
 )
 
 type Coin struct {
@@ -39,8 +39,8 @@ var DATAFILE = "/tmp/dataFile.gob"
 
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Serving", r.Host, "for", r.URL.Path)
-	myT := template.Must(template.ParseGlob("home.gohtml"))
-	myT.ExecuteTemplate(w, "home.gohtml", nil)
+	myT := template.Must(template.ParseGlob("github.com/krassor/serverHttp/html/home.gohtml"))
+	myT.ExecuteTemplate(w, "github.com/krassor/serverHttp/html/home.gohtml", nil)
 
 }
 
@@ -90,7 +90,7 @@ func listAll(w http.ResponseWriter, r *http.Request) {
 
 func changeElement(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Changing an element of the KV store!")
-	tmpl := template.Must(template.ParseFiles("update.gohtml"))
+	tmpl := template.Must(template.ParseFiles("github.com/krassor/serverHttp/html/update.gohtml"))
 	if r.Method != http.MethodPost {
 		tmpl.Execute(w, nil)
 		return
@@ -134,7 +134,7 @@ func main() {
 
 	go func() {
 		//fmt.Println(time.Now().Format(time.RFC3339), " :", "Server HTTP starting...")
-		sm.PrintlnWithTimeShtamp("erver HTTP starting...")
+		sm.PrintlnWithTimeShtamp("Server HTTP starting...")
 		PORT := ":8001"
 		r := http.NewServeMux()
 
@@ -194,7 +194,7 @@ func main() {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print(">> ")
 		text, _ := reader.ReadString('\n')
-		if strings.TrimSpace(string(text)) == "stop" {
+		if strings.ToLower(strings.TrimSpace(string(text))) == "stop" {
 			fmt.Println("Program exiting...")
 			return
 		}

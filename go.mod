@@ -1,9 +1,8 @@
-module proto/pb/api.pb.go
+module github.com/krassor/serverHttp
 
 go 1.18
 
 require (
-	github.com/krassor/serverHttp v0.0.0-20221027162500-2c94ead7b7d5
 	google.golang.org/grpc v1.50.1
 	google.golang.org/protobuf v1.28.1
 )
