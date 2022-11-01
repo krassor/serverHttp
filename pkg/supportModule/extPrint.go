@@ -6,5 +6,5 @@ import (
 )
 
 func PrintlnWithTimeShtamp(text string) {
-	fmt.Println(time.Now().Format(time.RFC3339), " : ", text)
+	fmt.Println(time.Now().Format(time.RFC3339), " :", text)
 }

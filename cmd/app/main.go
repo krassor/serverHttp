@@ -2,11 +2,12 @@ package main
 
 import (
 	"bufio"
-	"context"
+	//"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"net"
+
+	//"net"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -14,10 +15,8 @@ import (
 	"strings"
 	"time"
 
-	p "github.com/krassor/serverHttp/internal/transport/grpc/proto/pb"
-
+	grpcm "github.com/krassor/serverHttp/internal/transport/grpc"
 	sm "github.com/krassor/serverHttp/pkg/supportModule"
-	"google.golang.org/grpc"
 )
 
 type Coin struct {
@@ -28,9 +27,6 @@ type Coin struct {
 
 type ErrorJson struct {
 	ErrorText string
-}
-
-type MessageServer struct {
 }
 
 var DATA = make(map[string]Coin)
@@ -112,16 +108,6 @@ func changeElement(w http.ResponseWriter, r *http.Request) {
 	//}
 }
 
-func (MessageServer) SayIt(ctx context.Context, r *p.Request) (*p.Response, error) {
-	fmt.Println("Request Text:", r.Text)
-	fmt.Println("Request SubText:", r.Subtext)
-	response := &p.Response{
-		Text:    r.Text,
-		Subtext: "Got it!",
-	}
-	return response, nil
-}
-
 func main() {
 
 	//arguments := os.Args
@@ -157,7 +143,7 @@ func main() {
 		r.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
 		r.HandleFunc("/debug/pprof/trace", pprof.Trace)
 
-		fmt.Println(time.Now().Format(time.RFC3339), " :", "Server HTTP listening...")
+		sm.PrintlnWithTimeShtamp("Server HTTP listening...")
 		err := srv.ListenAndServe()
 		defer srv.Close()
 		if err != nil {
@@ -168,27 +154,11 @@ func main() {
 	}()
 
 	go func() {
-		fmt.Println(time.Now().Format(time.RFC3339), " :", "Server gRPC starting")
-		portGrpc := ":8080"
-		server := grpc.NewServer()
-		var messageServer MessageServer
-		p.RegisterMessageServiceServer(server, messageServer)
-		listen, err := net.Listen("tcp", portGrpc)
-		if err != nil {
+		if err := grpcm.ServerGrpcStart("8080"); err != nil {
 			fmt.Println(err)
-			return
-		} else {
-			fmt.Println(time.Now().Format(time.RFC3339), " :", "Server gRPC listening...")
-			server.Serve(listen)
 		}
-		defer listen.Close()
 	}()
 
-	go func() {
-
-	}()
-
-	//fmt.Println("Goroutins started", time.Now().Format(time.RFC3339))
 	time.Sleep(1 * time.Second)
 	for {
 		reader := bufio.NewReader(os.Stdin)
