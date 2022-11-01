@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	p "github.com/krassor/serverHttp/internal/trasport/grpc/proto/pb"
+	p "github.com/krassor/serverHttp/internal/transport/grpc/proto/pb"
 
 	sm "github.com/krassor/serverHttp/pkg/supportModule"
 	"google.golang.org/grpc"
