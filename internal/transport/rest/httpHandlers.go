@@ -29,7 +29,7 @@ func timeHandler(w http.ResponseWriter, r *http.Request) {
 func newsHandler(w http.ResponseWriter, r *http.Request) {
 	var testNewsSlice []models.News
 	testNews := models.News{
-		NewsId: 1,
+		//NewsId: 1,
 		//CreatedAt:  time.Now().Format(time.RFC3339),
 		Header:     "Заголовок про монету",
 		Body:       "Новость про монету",

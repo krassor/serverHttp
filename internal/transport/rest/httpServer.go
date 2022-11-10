@@ -7,12 +7,15 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/krassor/serverHttp/internal/services"
 	um "github.com/krassor/serverHttp/pkg/utils"
 )
 
 func ServerHttpStart() error {
 
 	router := mux.NewRouter()
+
+	router.HandleFunc("/api/news/create", services.CreateNews).Methods("POST")
 
 	port := os.Getenv("PORT") //Получить порт из файла .env; мы не указали порт, поэтому при локальном тестировании должна возвращаться пустая строка
 	if port == "" {
