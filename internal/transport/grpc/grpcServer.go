@@ -3,11 +3,12 @@ package grpcServer
 import (
 	"net"
 
-	p "github.com/krassor/serverHttp/internal/transport/grpc/proto/pb"
-	sm "github.com/krassor/serverHttp/pkg/supportModule"
-	"google.golang.org/grpc"
 	"context"
 	"fmt"
+
+	p "github.com/krassor/serverHttp/internal/transport/grpc/proto/pb"
+	um "github.com/krassor/serverHttp/pkg/utils"
+	"google.golang.org/grpc"
 )
 
 type MessageServer struct {
@@ -24,7 +25,7 @@ func (MessageServer) SayIt(ctx context.Context, r *p.Request) (*p.Response, erro
 }
 
 func ServerGrpcStart(grpcPort string) error {
-	sm.PrintlnWithTimeShtamp("Server gRPC starting")
+	um.PrintlnWithTimeShtamp("Server gRPC starting")
 	portGrpc := ":" + grpcPort
 	server := grpc.NewServer()
 	var messageServer MessageServer
@@ -33,7 +34,7 @@ func ServerGrpcStart(grpcPort string) error {
 	if err != nil {
 		return err
 	}
-	sm.PrintlnWithTimeShtamp("Server gRPC listening...")
+	um.PrintlnWithTimeShtamp("Server gRPC listening...")
 	server.Serve(listen)
 	defer listen.Close()
 	return nil

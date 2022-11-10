@@ -1,43 +1,31 @@
 package httpServer
 
 import (
+	"fmt"
 	"net/http"
-	"net/http/pprof"
-	"time"
+	"os"
 
-	sm "github.com/krassor/serverHttp/pkg/supportModule"
+	"github.com/gorilla/mux"
+
+	um "github.com/krassor/serverHttp/pkg/utils"
 )
 
-func ServerHttpStart(httpPort string) error {
-	sm.PrintlnWithTimeShtamp("Server HTTP starting...")
-	PORT := ":" + httpPort
-	r := http.NewServeMux()
+func ServerHttpStart() error {
 
-	srv := &http.Server{
-		Addr:         PORT,
-		Handler:      r,
-		ReadTimeout:  3 * time.Second,
-		WriteTimeout: 3 * time.Second,
+	router := mux.NewRouter()
+
+	port := os.Getenv("PORT") //Получить порт из файла .env; мы не указали порт, поэтому при локальном тестировании должна возвращаться пустая строка
+	if port == "" {
+		port = "8001" //localhost
 	}
 
-	r.HandleFunc("api/v1/news", newsHandler)
-	r.HandleFunc("/time", timeHandler)
-	r.HandleFunc("/", defaultHandler)
-	r.HandleFunc("/api/coins", coinsHandler)
-	r.HandleFunc("/change", changeElement)
-	r.HandleFunc("/list", listAll)
+	um.PrintlnWithTimeShtamp(fmt.Sprintf("Server HTTP starting with port: %s", port))
 
-	r.HandleFunc("/debug/pprof/", pprof.Index)
-	r.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	r.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	r.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	r.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	err := http.ListenAndServe(":"+port, router) //Запустите приложение, посетите localhost:8000/api
 
-	sm.PrintlnWithTimeShtamp("Server HTTP listening...")
-	err := srv.ListenAndServe()
-	defer srv.Close()
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

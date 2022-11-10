@@ -10,13 +10,18 @@ import (
 	"strings"
 	"time"
 
-	grpcm "github.com/krassor/serverHttp/internal/transport/grpc"
-	httpm "github.com/krassor/serverHttp/internal/transport/rest"
+	"github.com/krassor/serverHttp/internal/database"
+	grpcServer "github.com/krassor/serverHttp/internal/transport/grpc"
+	httpServer "github.com/krassor/serverHttp/internal/transport/rest"
 )
 
 //var DATA = make(map[string]Coin)
 
 //var DATAFILE = "/tmp/dataFile.gob"
+
+func init() {
+	database.InitDB()
+}
 
 func main() {
 
@@ -29,14 +34,15 @@ func main() {
 	// }
 
 	go func() {
-		if err := httpm.ServerHttpStart("8001"); err != nil {
+		if err := httpServer.ServerHttpStart(); err != nil {
 			fmt.Println(err)
+
 		}
 
 	}()
 
 	go func() {
-		if err := grpcm.ServerGrpcStart("8080"); err != nil {
+		if err := grpcServer.ServerGrpcStart("8080"); err != nil {
 			fmt.Println(err)
 		}
 	}()
