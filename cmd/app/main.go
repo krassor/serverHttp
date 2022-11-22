@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/krassor/serverHttp/internal/database"
+	"github.com/krassor/serverHttp/internal/repositories"
 	grpcServer "github.com/krassor/serverHttp/internal/transport/grpc"
 	httpServer "github.com/krassor/serverHttp/internal/transport/rest"
 )

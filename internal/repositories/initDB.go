@@ -1,5 +1,5 @@
-package database
-
+package repositories
+/*
 import (
 	"fmt"
 	"os"
@@ -48,3 +48,4 @@ func InitDB() {
 func GetDB() *gorm.DB {
 	return db
 }
+*/

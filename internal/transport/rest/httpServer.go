@@ -1,5 +1,5 @@
 package httpServer
-
+/*
 import (
 	"fmt"
 	"net/http"
@@ -32,3 +32,4 @@ func ServerHttpStart() error {
 
 	return nil
 }
+*/
