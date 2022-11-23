@@ -22,9 +22,7 @@ type newsService struct {
 	NewsRepository repositories.NewsRepositoryInterface
 }
 
-func NewNewsService(
-	newsRepository repositories.NewsRepositoryInterface,
-) NewsService {
+func NewNewsService(newsRepository repositories.NewsRepositoryInterface) NewsService {
 	return &newsService{
 		NewsRepository: newsRepository,
 	}
