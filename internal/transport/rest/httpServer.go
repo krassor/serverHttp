@@ -1,35 +1,57 @@
 package httpServer
-/*
+
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	"github.com/joho/godotenv"
 
-	"github.com/krassor/serverHttp/internal/services"
-	um "github.com/krassor/serverHttp/pkg/utils"
+	"github.com/krassor/serverHttp/internal/transport/rest/routers"
 )
 
-func ServerHttpStart() error {
+type HttpImpl struct {
+	HttpRouter *routers.HttpRouterImpl
+	httpServer *http.Server
+}
 
-	router := mux.NewRouter()
+func NewHttpServer(
+	HttpRouter *routers.HttpRouterImpl,
+) *HttpImpl {
+	return &HttpImpl{
+		HttpRouter: HttpRouter,
+	}
+}
 
-	router.HandleFunc("/api/news/create", services.CreateNews).Methods("POST")
+func (p *HttpImpl) setupRouter(app *chi.Mux) {
+	p.HttpRouter.Router(app)
+}
 
-	port := os.Getenv("PORT") //Получить порт из файла .env; мы не указали порт, поэтому при локальном тестировании должна возвращаться пустая строка
-	if port == "" {
-		port = "8001" //localhost
+func (p *HttpImpl) Listen() {
+	app := chi.NewRouter()
+
+	p.setupRouter(app)
+
+	e := godotenv.Load() //Загрузить файл .env
+	if e != nil {
+		fmt.Println(e)
 	}
 
-	um.PrintlnWithTimeShtamp(fmt.Sprintf("Server HTTP starting with port: %s", port))
+	serverPort := os.Getenv("http_port")
+	p.httpServer = &http.Server{
+		Addr:    serverPort,
+		Handler: app,
+	}
+	log.Printf("Server started on Port %s ", serverPort)
+	p.httpServer.ListenAndServe()
+}
 
-	err := http.ListenAndServe(":"+port, router) //Запустите приложение, посетите localhost:8000/api
-
-	if err != nil {
+func (p *HttpImpl) Shutdown(ctx context.Context) error {
+	if err := p.httpServer.Shutdown(ctx); err != nil {
 		return err
 	}
-
 	return nil
 }
-*/

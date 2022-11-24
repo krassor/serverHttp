@@ -2,50 +2,46 @@ package main
 
 import (
 	"bufio"
-	//"context"
 	"fmt"
-
-	//"net"
 	"os"
 	"strings"
 	"time"
+	"context"
 
 	"github.com/krassor/serverHttp/internal/repositories"
-	grpcServer "github.com/krassor/serverHttp/internal/transport/grpc"
-	httpServer "github.com/krassor/serverHttp/internal/transport/rest"
+	"github.com/krassor/serverHttp/internal/services"
+	"github.com/krassor/serverHttp/internal/transport/rest/handlers"
+	"github.com/krassor/serverHttp/internal/transport/rest/routers"
+	"github.com/krassor/serverHttp/internal/transport/rest"
+	"github.com/krassor/serverHttp/internal/graceful"
 )
 
 //var DATA = make(map[string]Coin)
 
 //var DATAFILE = "/tmp/dataFile.gob"
 
-func init() {
-	database.InitDB()
-}
-
 func main() {
 
-	//arguments := os.Args
-	// if len(arguments) == 1 {
-	// 	fmt.Println("using default http port: ", PORT)
-	// 	fmt.Println("using default grpc port: ", portGrpc)
-	// } else {
-	// 	PORT = ":" + arguments[1]
-	// }
+	db := repositories.InitDB()
+	newsRepository := repositories.NewNewsRepostiory(db)
+	newsService := services.NewNewsService(newsRepository)
+	newsHandler := handlers.NewHttpHandler(newsService)
+	newsHandlerImpl := handlers.NewHttpHandlerImpl(newsHandler)
+	newsRouter := routers.NewHttpRouter(newsHandlerImpl)
+	newsHttpServer := httpServer.NewHttpServer(newsRouter)
 
-	go func() {
-		if err := httpServer.ServerHttpStart(); err != nil {
-			fmt.Println(err)
+	maxSecond := 5 * time.Second
+	graceful.GracefulShutdown(
+		context.TODO(),
+		maxSecond,
+		map[string]graceful.Operation{
+			"http": func(ctx context.Context) error {
+				return newsHttpServer.Shutdown(ctx)
+			},
+		},
+	)
 
-		}
-
-	}()
-
-	go func() {
-		if err := grpcServer.ServerGrpcStart("8080"); err != nil {
-			fmt.Println(err)
-		}
-	}()
+	newsHttpServer.Listen()
 
 	time.Sleep(1 * time.Second)
 	for {

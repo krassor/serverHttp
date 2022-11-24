@@ -11,7 +11,7 @@ type HttpRouterImpl struct {
 	handlers *handlers.HttpHandlerImpl
 }
 
-func NewHttpRoute(
+func NewHttpRouter(
 	handlers *handlers.HttpHandlerImpl,
 ) *HttpRouterImpl {
 	return &HttpRouterImpl{
@@ -22,6 +22,7 @@ func NewHttpRoute(
 // setup cors
 func (h *HttpRouterImpl) cors(r *chi.Mux) {
 	r.Use(cors.AllowAll().Handler)
+
 }
 
 func (h *HttpRouterImpl) Router(r *chi.Mux) {
