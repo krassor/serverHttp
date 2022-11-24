@@ -75,7 +75,7 @@ func (newsHandler newsHandlers) DeleteNewsByID(w http.ResponseWriter, r *http.Re
 	}
 	newsResponse := utils.Message(true, "news deleted")
 	utils.Json(w, http.StatusOK, newsResponse)
-	
+
 }
 
 func (newsHandler newsHandlers) CreateNewNews(w http.ResponseWriter, r *http.Request) {
@@ -94,7 +94,7 @@ func (newsHandler newsHandlers) CreateNewNews(w http.ResponseWriter, r *http.Req
 	//newsResponseDto := CreateNewsResponse(newsEntity)
 	var newsResponseParams dto.NewsResponseParams
 	newsResponseParams.NewsID = newsEntity.ID
-	newsResponse := utils.Message(false, newsResponseParams)
+	newsResponse := utils.Message(true, newsResponseParams)
 	utils.Json(w, http.StatusOK, newsResponse)
 }
 

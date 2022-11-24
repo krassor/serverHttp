@@ -1,19 +1,15 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
-	"strings"
-	"time"
 	"context"
+	"time"
 
+	"github.com/krassor/serverHttp/internal/graceful"
 	"github.com/krassor/serverHttp/internal/repositories"
 	"github.com/krassor/serverHttp/internal/services"
+	httpServer "github.com/krassor/serverHttp/internal/transport/rest"
 	"github.com/krassor/serverHttp/internal/transport/rest/handlers"
 	"github.com/krassor/serverHttp/internal/transport/rest/routers"
-	"github.com/krassor/serverHttp/internal/transport/rest"
-	"github.com/krassor/serverHttp/internal/graceful"
 )
 
 //var DATA = make(map[string]Coin)
@@ -43,15 +39,15 @@ func main() {
 
 	newsHttpServer.Listen()
 
-	time.Sleep(1 * time.Second)
-	for {
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print(">> ")
-		text, _ := reader.ReadString('\n')
-		if strings.ToLower(strings.TrimSpace(string(text))) == "stop" {
-			fmt.Println("Program exiting...")
-			return
-		}
-	}
+	// time.Sleep(1 * time.Second)
+	// for {
+	// 	reader := bufio.NewReader(os.Stdin)
+	// 	fmt.Print(">> ")
+	// 	text, _ := reader.ReadString('\n')
+	// 	if strings.ToLower(strings.TrimSpace(string(text))) == "stop" {
+	// 		fmt.Println("Program exiting...")
+	// 		return
+	// 	}
+	// }
 	//fmt.Println("End program")
 }

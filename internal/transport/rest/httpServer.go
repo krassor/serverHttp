@@ -3,12 +3,12 @@ package httpServer
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog/log"
 
 	"github.com/krassor/serverHttp/internal/transport/rest/routers"
 )
@@ -41,12 +41,18 @@ func (p *HttpImpl) Listen() {
 	}
 
 	serverPort := os.Getenv("http_port")
+	serverAddress := os.Getenv("localhost")
 	p.httpServer = &http.Server{
-		Addr:    serverPort,
+		Addr:    fmt.Sprintf("%s:%s", serverAddress, serverPort),
 		Handler: app,
 	}
-	log.Printf("Server started on Port %s ", serverPort)
-	p.httpServer.ListenAndServe()
+	log.Info().Msgf("Server started on Port %s ", serverPort)
+	err := p.httpServer.ListenAndServe()
+
+	if err != nil {
+		log.Warn().Msgf("httpServer.ListenAndServe() Error: %s", err)
+	}
+
 }
 
 func (p *HttpImpl) Shutdown(ctx context.Context) error {
