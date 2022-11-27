@@ -18,21 +18,23 @@ func InitDB() *gorm.DB {
 		log.Warn().Msgf("godotenv.Load() Error: %s", e)
 	}
 
-	username := os.Getenv("db_user")
-	password := os.Getenv("db_pass")
-	dbName := os.Getenv("db_name")
-	dbHost := os.Getenv("db_host")
-	dbPort := os.Getenv("db_port")
+	username := os.Getenv("NEWS_DB_USER")
+	password := os.Getenv("NEWS_DB_PASSWORD")
+	dbName := os.Getenv("NEWS_DB_NAME")
+	dbHost := os.Getenv("NEWS_DB_HOST")
+	dbPort := os.Getenv("NEWS_DB_PORT")
 
 	dbUri := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", dbHost, dbPort, username, dbName, password) //Создать строку подключения
 	fmt.Println(dbUri)
 
 	conn, err := gorm.Open("postgres", dbUri)
 	if err != nil {
-		fmt.Print(err)
+		log.Error().Msgf("Error gorm.Open(): %s", err)
 	}
+	log.Info().Msg("gorm have connected to database")
 
 	conn.Debug().AutoMigrate(&entities.News{}) //Миграция базы данных
+	//log.Info().Msg("gorm have connected to database")
 
 	return conn
 }
