@@ -41,6 +41,7 @@ func (p *HttpImpl) Listen() {
 
 	serverPort := os.Getenv("NEWS_HTTP_PORT")
 	serverAddress := os.Getenv("NEWS_HTTP_HOST_LISTEN")
+	log.Info().Msgf("Server http get env %s:%s ", serverAddress, serverPort)
 	p.httpServer = &http.Server{
 		Addr:    fmt.Sprintf("%s:%s", serverAddress, serverPort),
 		Handler: app,

@@ -6,17 +6,16 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/joho/godotenv"
 	"github.com/krassor/serverHttp/internal/models/entities"
 	"github.com/rs/zerolog/log"
 )
 
 func InitDB() *gorm.DB {
 
-	e := godotenv.Load() //Загрузить файл .env
-	if e != nil {
-		log.Warn().Msgf("godotenv.Load() Error: %s", e)
-	}
+	// e := godotenv.Load() //Загрузить файл .env
+	// if e != nil {
+	// 	log.Warn().Msgf("godotenv.Load() Error: %s", e)
+	// }
 
 	username := os.Getenv("NEWS_DB_USER")
 	password := os.Getenv("NEWS_DB_PASSWORD")
