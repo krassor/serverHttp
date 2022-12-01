@@ -18,6 +18,7 @@ type NewsHandlers interface {
 	GetNewsByID(w http.ResponseWriter, r *http.Request)
 	CreateNewNews(w http.ResponseWriter, r *http.Request)
 	DeleteNewsByID(w http.ResponseWriter, r *http.Request)
+	GetFiles(w http.ResponseWriter, r *http.Request)
 }
 
 type newsHandlers struct {
@@ -28,6 +29,16 @@ func NewHttpHandler(newsService services.NewsService) NewsHandlers {
 	return &newsHandlers{
 		NewsService: newsService,
 	}
+}
+
+func (newsHandler newsHandlers) GetFiles(w http.ResponseWriter, r *http.Request) {
+	//workDir := "/home"
+	filesDir := "/home/files" //http.Dir(filepath.Join(workDir, "files"))
+
+	fs := http.StripPrefix("/files/", http.FileServer(http.Dir(filesDir)))
+	fs.ServeHTTP(w, r)
+
+	//Example: http.Handle("/tmpfiles/", http.StripPrefix("/tmpfiles/", http.FileServer(http.Dir("/tmp"))))
 }
 
 func (newsHandler newsHandlers) GetNews(w http.ResponseWriter, r *http.Request) {
