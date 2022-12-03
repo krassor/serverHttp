@@ -3,6 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/krassor/serverHttp/internal/models/dto"
@@ -32,10 +34,26 @@ func NewHttpHandler(newsService services.NewsService) NewsHandlers {
 }
 
 func (newsHandler newsHandlers) GetFiles(w http.ResponseWriter, r *http.Request) {
-	//workDir := "/home"
+	workDir := "/home"
 	filesDir := "/home/files" //http.Dir(filepath.Join(workDir, "files"))
 
+	fp := filepath.Join(workDir, filepath.Clean(r.URL.Path))
+	// Return a 404 if the file doesn't exist
+	info, err := os.Stat(fp)
+	if err != nil {
+		if os.IsNotExist(err) {
+			http.NotFound(w, r)
+			return
+		}
+	}
+	// Return a 404 if the request is for a directory
+	if info.IsDir() {
+		http.NotFound(w, r)
+		return
+	}
+
 	fs := http.StripPrefix("/files/", http.FileServer(http.Dir(filesDir)))
+
 	fs.ServeHTTP(w, r)
 
 	//Example: http.Handle("/tmpfiles/", http.StripPrefix("/tmpfiles/", http.FileServer(http.Dir("/tmp"))))
@@ -55,7 +73,6 @@ func (newsHandler newsHandlers) GetNews(w http.ResponseWriter, r *http.Request) 
 }
 
 func (newsHandler newsHandlers) GetNewsByID(w http.ResponseWriter, r *http.Request) {
-	//не забыть вытащить ID
 	rawNewsId := chi.URLParam(r, "newsId")
 	newsId, err := strconv.Atoi(rawNewsId)
 	if err != nil {
