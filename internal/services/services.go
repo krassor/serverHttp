@@ -3,19 +3,20 @@ package services
 import (
 	//"database/sql"
 	//"golang-starter/infrastructures/logger"
+	"context"
 	"log"
 
-	"github.com/jinzhu/gorm"
 	"github.com/krassor/serverHttp/internal/models/dto"
 	"github.com/krassor/serverHttp/internal/models/entities"
 	"github.com/krassor/serverHttp/internal/repositories"
+	"gorm.io/gorm"
 )
 
 type NewsService interface {
-	GetNews() ([]entities.News, error)
-	GetNewsByID(newsID int) (entities.News, error)
-	CreateNewNews(data dto.NewsRequestBody) (entities.News, error)
-	DeleteNews(newsID int) error
+	GetNews(ctx context.Context) ([]entities.News, error)
+	GetNewsByID(ctx context.Context, newsID int) (entities.News, error)
+	CreateNewNews(ctx context.Context, data dto.NewsRequestBody) (entities.News, error)
+	DeleteNews(ctx context.Context, newsID int) error
 }
 
 type newsService struct {
@@ -28,9 +29,9 @@ func NewNewsService(newsRepository repositories.NewsRepositoryInterface) NewsSer
 	}
 }
 
-func (repo newsService) GetNews() ([]entities.News, error) {
+func (repo newsService) GetNews(ctx context.Context) ([]entities.News, error) {
 	// var products []entities.Products
-	news, err := repo.NewsRepository.FindAll()
+	news, err := repo.NewsRepository.FindAll(ctx)
 	if err != nil {
 		//logger.Log.Errorln(err)
 		log.Println(err)
@@ -40,8 +41,8 @@ func (repo newsService) GetNews() ([]entities.News, error) {
 	return news, nil
 }
 
-func (repo newsService) GetNewsByID(newsID int) (entities.News, error) {
-	news, err := repo.NewsRepository.FindByID(uint(newsID))
+func (repo newsService) GetNewsByID(ctx context.Context, newsID int) (entities.News, error) {
+	news, err := repo.NewsRepository.FindByID(ctx, uint(newsID))
 	if err != nil {
 		//logger.Log.Errorln(err)
 		log.Println(err)
@@ -51,14 +52,14 @@ func (repo newsService) GetNewsByID(newsID int) (entities.News, error) {
 	return news, nil
 }
 
-func (repo newsService) CreateNewNews(data dto.NewsRequestBody) (entities.News, error) {
+func (repo newsService) CreateNewNews(ctx context.Context, data dto.NewsRequestBody) (entities.News, error) {
 	news := entities.News{
 		Header:     data.Header,
 		Body:       data.Body,
 		PictureURL: data.PictureURL,
 	}
 
-	result, err := repo.NewsRepository.Save(news)
+	result, err := repo.NewsRepository.Save(ctx, news)
 	if err != nil {
 		//logger.Log.Errorln(err)
 		log.Println(err)
@@ -68,9 +69,9 @@ func (repo newsService) CreateNewNews(data dto.NewsRequestBody) (entities.News, 
 	return result, nil
 }
 
-func (repo newsService) DeleteNews(newsID int) error {
+func (repo newsService) DeleteNews(ctx context.Context, newsID int) error {
 
-	news, err := repo.GetNewsByID(newsID)
+	news, err := repo.GetNewsByID(ctx, newsID)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -79,5 +80,5 @@ func (repo newsService) DeleteNews(newsID int) error {
 		return gorm.ErrRecordNotFound
 	}
 
-	return repo.NewsRepository.Delete(news)
+	return repo.NewsRepository.Delete(ctx, news)
 }

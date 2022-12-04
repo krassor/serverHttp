@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/krassor/serverHttp/internal/models/entities"
 	"github.com/rs/zerolog/log"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func InitDB() *gorm.DB {
@@ -23,10 +23,11 @@ func InitDB() *gorm.DB {
 	dbHost := os.Getenv("NEWS_DB_HOST")
 	dbPort := os.Getenv("NEWS_DB_PORT")
 
-	dbUri := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", dbHost, dbPort, username, dbName, password) //Создать строку подключения
-	fmt.Println(dbUri)
+	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", dbHost, dbPort, username, dbName, password) //Создать строку подключения
+	fmt.Println(dsn)
 
-	conn, err := gorm.Open("postgres", dbUri)
+	conn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
 	if err != nil {
 		log.Error().Msgf("Error gorm.Open(): %s", err)
 	}

@@ -1,15 +1,17 @@
 package repositories
 
 import (
-	"github.com/jinzhu/gorm"
+	"context"
+
 	"github.com/krassor/serverHttp/internal/models/entities"
+	"gorm.io/gorm"
 )
 
 type NewsRepositoryInterface interface {
-	FindAll() ([]entities.News, error)
-	FindByID(id uint) (entities.News, error)
-	Save(news entities.News) (entities.News, error)
-	Delete(news entities.News) error
+	FindAll(ctx context.Context) ([]entities.News, error)
+	FindByID(ctx context.Context, id uint) (entities.News, error)
+	Save(ctx context.Context, news entities.News) (entities.News, error)
+	Delete(ctx context.Context, news entities.News) error
 }
 
 type newsRepository struct {
@@ -22,34 +24,35 @@ func NewNewsRepostiory(DB *gorm.DB) NewsRepositoryInterface {
 	}
 }
 
-func (n *newsRepository) FindAll() ([]entities.News, error) {
+func (n *newsRepository) FindAll(ctx context.Context) ([]entities.News, error) {
 	var news []entities.News
-	result := n.DB.Find(&news)
+
+	result := n.DB.WithContext(ctx).Find(&news)
 	if result.Error != nil {
 		return []entities.News{}, result.Error
 	}
 	return news, nil
 }
 
-func (n *newsRepository) FindByID(id uint) (entities.News, error) {
+func (n *newsRepository) FindByID(ctx context.Context, id uint) (entities.News, error) {
 	var news entities.News
-	result := n.DB.First(&news, id)
+	result := n.DB.WithContext(ctx).First(&news, id)
 	if result.Error != nil {
 		return entities.News{}, result.Error
 	}
 	return news, nil
 }
 
-func (n *newsRepository) Save(news entities.News) (entities.News, error) {
-	result := n.DB.Save(&news)
+func (n *newsRepository) Save(ctx context.Context, news entities.News) (entities.News, error) {
+	result := n.DB.WithContext(ctx).Save(&news)
 	if result.Error != nil {
 		return entities.News{}, result.Error
 	}
 	return news, nil
 }
 
-func (n *newsRepository) Delete(news entities.News) error {
-	result := n.DB.Delete(&news)
+func (n *newsRepository) Delete(ctx context.Context, news entities.News) error {
+	result := n.DB.WithContext(ctx).Delete(&news)
 	if result.Error != nil {
 		return result.Error
 	}

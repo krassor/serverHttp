@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/krassor/serverHttp/internal/graceful"
+	"github.com/krassor/serverHttp/internal/logger"
 	"github.com/krassor/serverHttp/internal/repositories"
 	"github.com/krassor/serverHttp/internal/services"
 	httpServer "github.com/krassor/serverHttp/internal/transport/rest"
@@ -18,6 +19,8 @@ import (
 
 func main() {
 
+	logger.InitLogger()
+
 	db := repositories.InitDB()
 	newsRepository := repositories.NewNewsRepostiory(db)
 	newsService := services.NewNewsService(newsRepository)
@@ -26,9 +29,9 @@ func main() {
 	newsRouter := routers.NewHttpRouter(newsHandlerImpl)
 	newsHttpServer := httpServer.NewHttpServer(newsRouter)
 
-	maxSecond := 5 * time.Second
+	maxSecond := 10 * time.Second
 	graceful.GracefulShutdown(
-		context.TODO(),
+		context.Background(),
 		maxSecond,
 		map[string]graceful.Operation{
 			"http": func(ctx context.Context) error {
@@ -39,15 +42,4 @@ func main() {
 
 	newsHttpServer.Listen()
 
-	// time.Sleep(1 * time.Second)
-	// for {
-	// 	reader := bufio.NewReader(os.Stdin)
-	// 	fmt.Print(">> ")
-	// 	text, _ := reader.ReadString('\n')
-	// 	if strings.ToLower(strings.TrimSpace(string(text))) == "stop" {
-	// 		fmt.Println("Program exiting...")
-	// 		return
-	// 	}
-	// }
-	//fmt.Println("End program")
 }
