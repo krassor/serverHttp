@@ -3,6 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/krassor/serverHttp/internal/models/dto"
@@ -32,10 +34,26 @@ func NewHttpHandler(newsService services.NewsService) NewsHandlers {
 }
 
 func (newsHandler newsHandlers) GetFiles(w http.ResponseWriter, r *http.Request) {
-	//workDir := "/home"
+	workDir := "/home"
 	filesDir := "/home/files" //http.Dir(filepath.Join(workDir, "files"))
 
+	fp := filepath.Join(workDir, filepath.Clean(r.URL.Path))
+	// Return a 404 if the file doesn't exist
+	info, err := os.Stat(fp)
+	if err != nil {
+		if os.IsNotExist(err) {
+			http.NotFound(w, r)
+			return
+		}
+	}
+	// Return a 404 if the request is for a directory
+	if info.IsDir() {
+		http.NotFound(w, r)
+		return
+	}
+
 	fs := http.StripPrefix("/files/", http.FileServer(http.Dir(filesDir)))
+
 	fs.ServeHTTP(w, r)
 
 	//Example: http.Handle("/tmpfiles/", http.StripPrefix("/tmpfiles/", http.FileServer(http.Dir("/tmp"))))
@@ -43,31 +61,30 @@ func (newsHandler newsHandlers) GetFiles(w http.ResponseWriter, r *http.Request)
 
 func (newsHandler newsHandlers) GetNews(w http.ResponseWriter, r *http.Request) {
 	// get all news
-	news, err := newsHandler.NewsService.GetNews()
+	news, err := newsHandler.NewsService.GetNews(r.Context())
 	var newsResponse interface{}
 	if err != nil {
 		utils.Err(w, http.StatusInternalServerError, err)
 		return
 	}
-	newsResponse = CreateNewsListResponse(news)
+	newsResponse = createNewsListResponse(news)
 	utils.Json(w, http.StatusOK, newsResponse)
 
 }
 
 func (newsHandler newsHandlers) GetNewsByID(w http.ResponseWriter, r *http.Request) {
-	//не забыть вытащить ID
 	rawNewsId := chi.URLParam(r, "newsId")
 	newsId, err := strconv.Atoi(rawNewsId)
 	if err != nil {
 		utils.Err(w, http.StatusInternalServerError, err)
 		return
 	}
-	news, err := newsHandler.NewsService.GetNewsByID(newsId)
+	news, err := newsHandler.NewsService.GetNewsByID(r.Context(), newsId)
 	if err != nil {
 		utils.Err(w, http.StatusInternalServerError, err)
 		return
 	}
-	newsResponse := CreateNewsResponse(news)
+	newsResponse := createNewsResponse(news)
 	utils.Json(w, http.StatusOK, newsResponse)
 }
 
@@ -79,7 +96,7 @@ func (newsHandler newsHandlers) DeleteNewsByID(w http.ResponseWriter, r *http.Re
 		utils.Err(w, http.StatusInternalServerError, err)
 		return
 	}
-	err = newsHandler.NewsService.DeleteNews(newsId)
+	err = newsHandler.NewsService.DeleteNews(r.Context(), newsId)
 	if err != nil {
 		utils.Err(w, http.StatusInternalServerError, err)
 		return
@@ -97,7 +114,7 @@ func (newsHandler newsHandlers) CreateNewNews(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	newsEntity, err := newsHandler.NewsService.CreateNewNews(news)
+	newsEntity, err := newsHandler.NewsService.CreateNewNews(r.Context(), news)
 	if err != nil {
 		utils.Err(w, http.StatusInternalServerError, err)
 		return
@@ -109,7 +126,7 @@ func (newsHandler newsHandlers) CreateNewNews(w http.ResponseWriter, r *http.Req
 	utils.Json(w, http.StatusOK, newsResponse)
 }
 
-func CreateNewsResponse(news entities.News) dto.NewsResponseBody {
+func createNewsResponse(news entities.News) dto.NewsResponseBody {
 	return dto.NewsResponseBody{
 		Header:     news.Header,
 		Body:       news.Body,
@@ -117,10 +134,10 @@ func CreateNewsResponse(news entities.News) dto.NewsResponseBody {
 	}
 }
 
-func CreateNewsListResponse(newslist []entities.News) []dto.NewsResponseBody {
+func createNewsListResponse(newslist []entities.News) []dto.NewsResponseBody {
 	var newsListResponse []dto.NewsResponseBody
 	for _, n := range newslist {
-		news := CreateNewsResponse(n)
+		news := createNewsResponse(n)
 		newsListResponse = append(newsListResponse, news)
 	}
 	return newsListResponse

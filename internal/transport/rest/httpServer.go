@@ -49,8 +49,12 @@ func (p *HttpImpl) Listen() {
 	log.Info().Msgf("Server started on Port %s ", serverPort)
 	err := p.httpServer.ListenAndServe()
 
-	if err != nil {
+	if err != nil && err != http.ErrServerClosed {
 		log.Warn().Msgf("httpServer.ListenAndServe() Error: %s", err)
+	}
+
+	if err == http.ErrServerClosed {
+		log.Info().Msgf("%s", err)
 	}
 
 }

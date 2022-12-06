@@ -1,7 +1,7 @@
 package entities
 
 import (
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type News struct {

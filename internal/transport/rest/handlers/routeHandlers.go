@@ -21,5 +21,5 @@ func (newsHandlerImpl *HttpHandlerImpl) Router(r *chi.Mux) {
 	r.Delete("/news/{newsId}", newsHandlerImpl.NewsHandler.DeleteNewsByID)
 
 	r.Get("/files/*", newsHandlerImpl.NewsHandler.GetFiles)
-	r.Get("/files", newsHandlerImpl.NewsHandler.GetFiles)
+
 }
