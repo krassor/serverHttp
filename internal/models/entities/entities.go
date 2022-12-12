@@ -11,6 +11,6 @@ type News struct {
 	PictureURL string `gorm:"column:pictureURL"`
 }
 
-func (t *News) TableName() string {
-	return "news"
-}
+// func (t *News) TableName() string {
+// 	return "news"
+// }

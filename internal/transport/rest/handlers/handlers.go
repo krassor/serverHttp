@@ -33,7 +33,7 @@ func NewHttpHandler(newsService services.NewsService) NewsHandlers {
 	}
 }
 
-func (newsHandler newsHandlers) GetFiles(w http.ResponseWriter, r *http.Request) {
+func (newsHandler *newsHandlers) GetFiles(w http.ResponseWriter, r *http.Request) {
 	workDir := "/home"
 	filesDir := "/home/files" //http.Dir(filepath.Join(workDir, "files"))
 
@@ -59,7 +59,7 @@ func (newsHandler newsHandlers) GetFiles(w http.ResponseWriter, r *http.Request)
 	//Example: http.Handle("/tmpfiles/", http.StripPrefix("/tmpfiles/", http.FileServer(http.Dir("/tmp"))))
 }
 
-func (newsHandler newsHandlers) GetNews(w http.ResponseWriter, r *http.Request) {
+func (newsHandler *newsHandlers) GetNews(w http.ResponseWriter, r *http.Request) {
 	// get all news
 	news, err := newsHandler.NewsService.GetNews(r.Context())
 	var newsResponse interface{}
@@ -72,7 +72,7 @@ func (newsHandler newsHandlers) GetNews(w http.ResponseWriter, r *http.Request) 
 
 }
 
-func (newsHandler newsHandlers) GetNewsByID(w http.ResponseWriter, r *http.Request) {
+func (newsHandler *newsHandlers) GetNewsByID(w http.ResponseWriter, r *http.Request) {
 	rawNewsId := chi.URLParam(r, "newsId")
 	newsId, err := strconv.Atoi(rawNewsId)
 	if err != nil {
@@ -88,8 +88,8 @@ func (newsHandler newsHandlers) GetNewsByID(w http.ResponseWriter, r *http.Reque
 	utils.Json(w, http.StatusOK, newsResponse)
 }
 
-func (newsHandler newsHandlers) DeleteNewsByID(w http.ResponseWriter, r *http.Request) {
-	//не забыть вытащить ID
+func (newsHandler *newsHandlers) DeleteNewsByID(w http.ResponseWriter, r *http.Request) {
+
 	rawNewsId := chi.URLParam(r, "newsId")
 	newsId, err := strconv.Atoi(rawNewsId)
 	if err != nil {
@@ -106,7 +106,7 @@ func (newsHandler newsHandlers) DeleteNewsByID(w http.ResponseWriter, r *http.Re
 
 }
 
-func (newsHandler newsHandlers) CreateNewNews(w http.ResponseWriter, r *http.Request) {
+func (newsHandler *newsHandlers) CreateNewNews(w http.ResponseWriter, r *http.Request) {
 	news := dto.NewsRequestBody{}
 	err := json.NewDecoder(r.Body).Decode(&news)
 	if err != nil {

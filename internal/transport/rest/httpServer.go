@@ -17,9 +17,7 @@ type HttpImpl struct {
 	httpServer *http.Server
 }
 
-func NewHttpServer(
-	HttpRouter *routers.HttpRouterImpl,
-) *HttpImpl {
+func NewHttpServer(HttpRouter *routers.HttpRouterImpl) *HttpImpl {
 	return &HttpImpl{
 		HttpRouter: HttpRouter,
 	}

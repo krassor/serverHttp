@@ -30,7 +30,7 @@ func NewNewsService(newsRepository repositories.NewsRepositoryInterface) NewsSer
 }
 
 func (repo newsService) GetNews(ctx context.Context) ([]entities.News, error) {
-	// var products []entities.Products
+
 	news, err := repo.NewsRepository.FindAll(ctx)
 	if err != nil {
 		//logger.Log.Errorln(err)
